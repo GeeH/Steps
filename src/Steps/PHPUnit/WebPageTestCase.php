@@ -41,7 +41,7 @@ abstract class WebPageTestCase extends BrowserTestCase
         $this->process->setWorkingDirectory('test/asset/public/');
         $this->process = $this->process->getProcess();
         $this->process->start();
-        usleep(100000);
+        usleep(500000);
     }
 
 
