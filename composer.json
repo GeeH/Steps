@@ -1,0 +1,12 @@
+{
+    "require": {
+        "aik099/phpunit-mink": "^2.0",
+        "behat/mink-goutte-driver": "^1.2",
+        "symfony/process": "^3.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "Steps\\": "src"
+        }
+    }
+}
