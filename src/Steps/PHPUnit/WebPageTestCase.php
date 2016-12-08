@@ -55,10 +55,13 @@ abstract class WebPageTestCase extends BrowserTestCase
     {
         $this->session = $this->getSession();
         $this->session->visit($url);
-        if ($this->session->getStatusCode() !== 200) {
-            throw new \Exception('200 status code expected, ' . $this->session->getStatusCode() . ' returned with the message `'
-                . $this->getStatusMessage() . '`');
-        }
+
+        return $this;
+    }
+
+    public function shouldBeOK() : self
+    {
+        self::assertEquals(200, $this->session->getStatusCode());
 
         return $this;
     }
@@ -72,15 +75,89 @@ abstract class WebPageTestCase extends BrowserTestCase
 
     public function shouldBeOnUrl(string $url) : self
     {
-        self::assertEquals($this->getSession()->getCurrentUrl(), $url);
+        self::assertEquals($this->getSession()->getCurrentUrl(), $url,
+            "Expecting URL `{$url}` got `{$this->getSession()->getCurrentUrl()}`");
 
         return $this;
     }
 
-    public function click(string $textToClick) : self
+    public function shouldBeOnUrlNotContaining(string $textUrlShouldNotContain)
     {
-        $this->getSession()->getPage()->clickLink($textToClick);
+        $textUrlShouldNotContain = preg_quote($textUrlShouldNotContain);
+        $url = $this->getSession()->getCurrentUrl();
+        self::assertNotRegExp('#' . $textUrlShouldNotContain . '#', $url,
+            "Expecting URL should not contain `{$textUrlShouldNotContain}` got `{$url}`");
 
         return $this;
     }
+
+    public function shouldBeOnUrlContaining(string $textUrlShouldContain) : self
+    {
+        $url = $this->getSession()->getCurrentUrl();
+        self::assertRegExp('#' . $textUrlShouldContain . '#', $url,
+            "Expecting URL should contain `{$textUrlShouldContain}` got `{$url}`");
+
+        return $this;
+    }
+
+    public function shouldBeStatusCode(int $statusCode) : self
+    {
+        self::assertEquals($statusCode, $this->getSession()->getStatusCode());
+
+        return $this;
+    }
+
+    public function click(string $textToClick, string $parentItem = null) : self
+    {
+        if ($this->getSession()->getPage()->hasLink($textToClick)) {
+            $this->getSession()->getPage()->clickLink($textToClick);
+            return $this;
+        }
+
+        if ($this->getSession()->getPage()->hasButton($textToClick)) {
+            $this->getSession()->getPage()->pressButton($textToClick);
+            return $this;
+        }
+
+        if ($this->getSession()->getPage()->hasUncheckedField($textToClick)) {
+            return $this->check($textToClick);
+        }
+
+        if ($this->getSession()->getPage()->hasCheckedField($textToClick)) {
+            return $this->uncheck($textToClick);
+        }
+
+        if ($this->getSession()->getPage()->hasSelect($parentItem)) {
+            return $this->select($textToClick, $parentItem);
+        }
+    }
+
+    public function fill(string $formElementName, string $textToType) : self
+    {
+        $this->getSession()->getPage()->fillField($formElementName, $textToType);
+
+        return $this;
+    }
+
+    public function check(string $formElementName) : self
+    {
+        $this->getSession()->getPage()->checkField($formElementName);
+
+        return $this;
+    }
+
+    public function uncheck(string $formElementName) : self
+    {
+        $this->getSession()->getPage()->uncheckField($formElementName);
+
+        return $this;
+    }
+
+    private function select(string $selectValue, string $selectElement) : self
+    {
+        $this->getSession()->getPage()->selectFieldOption($selectElement, $selectValue);
+
+        return $this;
+    }
+
 }
