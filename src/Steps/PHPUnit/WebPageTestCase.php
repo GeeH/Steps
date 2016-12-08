@@ -10,7 +10,7 @@ use Symfony\Component\Process\ProcessBuilder;
 abstract class WebPageTestCase extends BrowserTestCase
 {
     const PHP_LOCATION = '/usr/local/bin/php';
-    const SERVER_IP = '127.0.0.1';
+    const SERVER_IP = 'localhost';
     const SERVER_PORT = '4242';
 
     public static $browsers = array(
